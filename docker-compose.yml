@@ -1,0 +1,21 @@
+version: "3.8"
+
+services:
+  steganalysis:
+    build: .
+    volumes:
+      - ./cover_images:/app/cover_images
+      - ./stego_images:/app/stego_images
+      - ./outputs:/app/outputs
+      - ./checkpoints:/app/checkpoints
+      - ./configs:/app/configs
+    # GPU support (uncomment if using NVIDIA GPU)
+    # deploy:
+    #   resources:
+    #     reservations:
+    #       devices:
+    #         - driver: nvidia
+    #           count: 1
+    #           capabilities: [gpu]
+    command: >
+      python run_experiment.py --config configs/default_experiment.yaml

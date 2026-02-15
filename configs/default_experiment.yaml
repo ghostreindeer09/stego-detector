@@ -1,0 +1,145 @@
+# ==============================================================================
+# Steganalysis Framework — Default Experiment Configuration
+# ==============================================================================
+# All experiment parameters are defined here for full reproducibility.
+# Override per-experiment by copying this file and changing values.
+
+experiment:
+  name: "baseline_srnet_lsb"
+  description: "Baseline SRNet training on LSB-embedded stego dataset"
+  seed: 42
+  output_dir: "outputs"
+  log_level: "INFO"
+
+# --- Dataset Generation ---
+dataset:
+  cover_images_dir: "cover_images"        # Input folder of cover images
+  stego_images_dir: "stego_images"        # Output folder for generated stego images
+  mapping_csv: "dataset_mapping.csv"      # CSV mapping file
+  embedding_method: "lsb"                 # Embedding method: lsb
+  default_payload_length: 16              # Default message length (chars)
+  payload_charset: "alphanumeric"         # alphanumeric | alpha | digits | custom
+  variable_payload: false                 # If true, vary payload per image
+  payload_range: [8, 64]                  # Min/max payload length when variable
+  image_format: "png"                     # Output stego image format
+  seed: 42                                # RNG seed for reproducible messages
+
+# --- Data Loading ---
+dataloader:
+  image_size: 256
+  batch_size: 32
+  num_workers: 4
+  train_split: 0.7
+  val_split: 0.15
+  test_split: 0.15
+  pin_memory: true
+  pair_constraint: true                   # Use cover/stego pair-constraint batching
+  augmentation:
+    enabled: true
+    random_rotate90: true
+    horizontal_flip: true
+    vertical_flip: true
+    jpeg_compression:
+      enabled: true
+      quality_min: 70
+      quality_max: 95
+
+# --- Model ---
+model:
+  architecture: "srnet"                   # srnet | custom_cnn | classical_ml
+  use_kv_hpf: true
+  num_classes: 1
+  pretrained_weights: null                # Path to pretrained .pth, or null
+  # Classical ML settings (used when architecture == "classical_ml")
+  classical_ml:
+    algorithm: "random_forest"            # random_forest | svm | gradient_boosting | xgboost
+    features: ["histogram", "cooccurrence", "dct_stats"]
+    n_estimators: 200
+    max_depth: 15
+
+# --- Training ---
+training:
+  epochs: 50
+  optimizer: "adamw"                      # adam | adamw | sgd
+  learning_rate: 0.001
+  weight_decay: 0.00001
+  label_smoothing: 0.1
+  scheduler: "onecycle"                   # onecycle | cosine | step | plateau | none
+  scheduler_params:
+    pct_start: 0.1                        # OneCycleLR pct_start
+    step_size: 10                         # StepLR step_size
+    gamma: 0.1                            # StepLR gamma
+  amp:
+    enabled: true                         # Automatic Mixed Precision
+  early_stopping:
+    enabled: true
+    patience: 10
+    metric: "weighted_auc"
+    mode: "max"
+  checkpoint_dir: "checkpoints"
+  save_name: "srnet_best.pth"
+
+# --- Evaluation ---
+evaluation:
+  threshold: 0.5
+  metrics:
+    - precision
+    - recall
+    - f1
+    - roc_auc
+    - confusion_matrix
+    - false_positives
+    - false_negatives
+  plots:
+    roc_curve: true
+    precision_recall_curve: true
+    confusion_matrix_heatmap: true
+    loss_curves: true
+    metric_over_epochs: true
+  output_dir: "evaluation_results"
+
+# --- Robustness Testing ---
+robustness:
+  enabled: true
+  output_dir: "robustness_results"
+  perturbations:
+    jpeg_compression:
+      enabled: true
+      qualities: [50, 60, 70, 80, 90, 95]
+    gaussian_noise:
+      enabled: true
+      sigmas: [1.0, 3.0, 5.0, 10.0, 15.0]
+    resize:
+      enabled: true
+      scales: [0.25, 0.5, 0.75, 1.5, 2.0]
+    crop:
+      enabled: true
+      ratios: [0.5, 0.7, 0.9]
+    payload_size:
+      enabled: true
+      lengths: [4, 8, 16, 32, 64, 128]
+
+# --- Interpretability ---
+interpretability:
+  enabled: false                          # Set true for Grad-CAM / SHAP analysis
+  grad_cam:
+    enabled: true
+    target_layer: "layer5"
+    num_samples: 20
+    output_dir: "interpretability/grad_cam"
+  shap:
+    enabled: false                        # Requires shap library
+    num_background: 50
+    num_samples: 20
+    output_dir: "interpretability/shap"
+
+# --- Experiment Tracking (Optional) ---
+tracking:
+  enabled: false
+  backend: "mlflow"                       # mlflow | wandb
+  mlflow:
+    tracking_uri: "mlruns"
+    experiment_name: "steganalysis"
+  wandb:
+    project: "steganalysis"
+    entity: null

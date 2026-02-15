@@ -1,0 +1,101 @@
+# ==============================================================================
+# Robustness Sweep — Focused on perturbation resilience
+# ==============================================================================
+
+experiment:
+  name: "robustness_sweep_v1"
+  description: "Exhaustive robustness sweep across JPEG, noise, resize, crop, and payload"
+  seed: 42
+  output_dir: "outputs/robustness_sweep"
+  log_level: "INFO"
+
+dataset:
+  cover_images_dir: "cover_images"
+  stego_images_dir: "stego_images"
+  mapping_csv: "dataset_mapping.csv"
+  embedding_method: "lsb"
+  default_payload_length: 16
+  payload_charset: "alphanumeric"
+  variable_payload: true
+  payload_range: [4, 128]
+  image_format: "png"
+  seed: 42
+
+dataloader:
+  image_size: 256
+  batch_size: 64
+  num_workers: 4
+  train_split: 0.7
+  val_split: 0.15
+  test_split: 0.15
+  pin_memory: true
+  pair_constraint: true
+  augmentation:
+    enabled: true
+    random_rotate90: true
+    horizontal_flip: true
+    vertical_flip: true
+    jpeg_compression:
+      enabled: true
+      quality_min: 50
+      quality_max: 95
+
+model:
+  architecture: "srnet"
+  use_kv_hpf: true
+  num_classes: 1
+  pretrained_weights: "checkpoints/srnet_best.pth"
+
+training:
+  epochs: 0   # Skip training, evaluate only
+  optimizer: "adamw"
+  learning_rate: 0.001
+  weight_decay: 0.00001
+  label_smoothing: 0.1
+  scheduler: "none"
+  amp:
+    enabled: true
+  checkpoint_dir: "checkpoints"
+  save_name: "srnet_best.pth"
+
+evaluation:
+  threshold: 0.5
+  metrics:
+    - precision
+    - recall
+    - f1
+    - roc_auc
+    - confusion_matrix
+  plots:
+    roc_curve: true
+    precision_recall_curve: true
+    confusion_matrix_heatmap: true
+    loss_curves: false
+    metric_over_epochs: false
+  output_dir: "outputs/robustness_sweep/evaluation"
+
+robustness:
+  enabled: true
+  output_dir: "outputs/robustness_sweep/robustness"
+  perturbations:
+    jpeg_compression:
+      enabled: true
+      qualities: [30, 40, 50, 60, 70, 80, 90, 95, 100]
+    gaussian_noise:
+      enabled: true
+      sigmas: [0.5, 1.0, 2.0, 3.0, 5.0, 8.0, 10.0, 15.0, 20.0]
+    resize:
+      enabled: true
+      scales: [0.1, 0.25, 0.5, 0.75, 1.0, 1.5, 2.0, 3.0]
+    crop:
+      enabled: true
+      ratios: [0.3, 0.5, 0.7, 0.8, 0.9, 0.95]
+    payload_size:
+      enabled: true
+      lengths: [2, 4, 8, 16, 32, 64, 128, 256]
+
+interpretability:
+  enabled: false
+
+tracking:
+  enabled: false

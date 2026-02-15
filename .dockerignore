@@ -1,0 +1,17 @@
+__pycache__
+*.pyc
+*.pyo
+.git
+.gitignore
+*.egg-info
+dist
+build
+archive.zip
+dataset/
+checkpoints/*.pth
+outputs/
+stego_images/
+mlruns/
+wandb/
+.mypy_cache
+.pytest_cache

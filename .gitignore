@@ -1,0 +1,34 @@
+# Large files and datasets
+archive.zip
+dataset/
+data/
+checkpoints/
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+dist/
+build/
+*.egg
+
+# Virtual environments
+venv/
+env/
+.venv/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs (optional - remove these lines if you want to track logs)
+*.log
+train_log.txt
+training_output.log

@@ -1,0 +1,19 @@
+torch
+torchvision
+pillow
+numpy
+opencv-python
+streamlit
+matplotlib
+albumentations
+scikit-learn
+pyyaml
+scipy
+joblib
+# Optional: experiment tracking
+# mlflow
+# wandb
+# Optional: interpretability
+# shap
+# Optional: advanced ML
+# xgboost
