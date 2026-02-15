@@ -1,5 +1,10 @@
 # Modular Steganalysis Research Framework
 
+![Python 3.8+](https://img.shields.io/badge/python-3.8%2B-blue.svg)
+![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)
+![Code Style: Black](https://img.shields.io/badge/code%20style-black-000000.svg)
+
+
 A production-quality, config-driven framework for steganographic image analysis research. Supports automated dataset creation, CNN and classical ML training, comprehensive evaluation, robustness testing, and optional interpretability — all from a single YAML config.
 
 ---
@@ -253,4 +258,10 @@ outputs/
     ├── robustness_results.json
     ├── robustness_jpeg_compression.png
     └── robustness_gaussian_noise.png
+
+---
+
+## 📜 License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 ```

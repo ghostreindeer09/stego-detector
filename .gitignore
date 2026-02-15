@@ -32,3 +32,22 @@ Thumbs.db
 *.log
 train_log.txt
 training_output.log
+
+# Model Weights
+*.pth
+*.pt
+*.ckpt
+
+# Experiment Tracking
+mlruns/
+wandb/
+outputs/
+
+# Secrets
+.env
+
+# Testing & Coverage
+.coverage
+coverage.xml
+.pytest_cache/
+htmlcov/
