@@ -1,0 +1,83 @@
+# ==============================================================================
+# Steganalysis Framework — Open Images V7 Experiment Configuration
+# ==============================================================================
+# Training SRNet on Open Images V7 dataset for 20 epochs on GPU.
+
+experiment:
+  name: "openimages_srnet_lsb"
+  description: "SRNet training on Open Images V7 with LSB-embedded stego dataset"
+  seed: 42
+  output_dir: "outputs"
+  log_level: "INFO"
+
+# --- Dataset ---
+dataset:
+  source: "open_images_v7"
+  num_images: 1000                        # Number of images to download
+  cover_images_dir: "data/openimages/cover"
+  stego_images_dir: "data/openimages/stego"
+  embedding_method: "lsb"
+  default_payload_length: 16
+  payload_charset: "alphanumeric"
+  variable_payload: true
+  payload_range: [8, 64]
+  image_format: "png"
+  seed: 42
+
+# --- Data Loading ---
+dataloader:
+  image_size: 256
+  batch_size: 64
+  num_workers: 4
+  train_split: 0.80
+  val_split: 0.10
+  test_split: 0.10
+  pin_memory: true
+  pair_constraint: true
+  augmentation:
+    enabled: true
+    random_rotate90: true
+    horizontal_flip: true
+    vertical_flip: true
+    jpeg_compression:
+      enabled: false
+      quality_min: 90
+      quality_max: 95
+
+# --- Model ---
+model:
+  architecture: "srnet"
+  use_kv_hpf: true
+  num_classes: 1
+  pretrained_weights: null
+
+# --- Training ---
+training:
+  epochs: 150
+  optimizer: "adamw"
+  learning_rate: 0.001
+  weight_decay: 0.0001
+  label_smoothing: 0.0
+  scheduler: "onecycle"
+  scheduler_params:
+    pct_start: 0.3
+  amp:
+    enabled: true
+  early_stopping:
+    enabled: true
+    patience: 20
+    metric: "weighted_auc"
+    mode: "max"
+  checkpoint_dir: "checkpoints"
+  save_name: "srnet_openimages_best.pth"
+
+# --- Evaluation ---
+evaluation:
+  threshold: 0.5
+  metrics:
+    - precision
+    - recall
+    - f1
+    - roc_auc
+    - confusion_matrix
+  output_dir: "evaluation_results"

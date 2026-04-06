@@ -1,53 +1,99 @@
-# Large files and datasets
-archive.zip
-dataset/
+# ============================================================
+# DATASETS & GENERATED DATA
+# ============================================================
 data/
+dataset/
+archive.zip
+image_ids_and_rotation.csv
+image_list.txt
+
+# ============================================================
+# MODEL CHECKPOINTS & WEIGHTS
+# ============================================================
 checkpoints/
-
-# Python
-__pycache__/
-*.py[cod]
-*$py.class
-*.egg-info/
-dist/
-build/
-*.egg
-
-# Virtual environments
-venv/
-env/
-.venv/
-
-# IDE
-.vscode/
-.idea/
-*.swp
-*.swo
-
-# OS
-.DS_Store
-Thumbs.db
-
-# Logs (optional - remove these lines if you want to track logs)
-*.log
-train_log.txt
-training_output.log
-
-# Model Weights
 *.pth
 *.pt
 *.ckpt
 
-# Experiment Tracking
+# ============================================================
+# PYTHON
+# ============================================================
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+*.egg
+dist/
+build/
+*.so
+
+# ============================================================
+# VIRTUAL ENVIRONMENTS
+# ============================================================
+venv/
+env/
+.venv/
+.conda/
+
+# ============================================================
+# IDE & EDITOR
+# ============================================================
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.project
+.classpath
+.settings/
+
+# ============================================================
+# OS FILES
+# ============================================================
+.DS_Store
+Thumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+
+# ============================================================
+# LOGS
+# ============================================================
+*.log
+train_log.txt
+training_output.log
+
+# ============================================================
+# EXPERIMENT TRACKING
+# ============================================================
 mlruns/
 wandb/
 outputs/
 
-# Secrets
+# ============================================================
+# SECRETS & ENV
+# ============================================================
 .env
+.env.local
+.env.*.local
 
-# Testing & Coverage
+# ============================================================
+# TESTING & COVERAGE
+# ============================================================
 .coverage
 coverage.xml
 .pytest_cache/
 htmlcov/
+.mypy_cache/
+.tox/
+
+# ============================================================
+# UNSEEN TEST IMAGES (keep the script, ignore the PNGs)
+# ============================================================
+unseen_test/*.png
+
+# ============================================================
+# MISC LARGE / GENERATED FILES
+# ============================================================
+*.csv
+!requirements.txt
+stego_images/

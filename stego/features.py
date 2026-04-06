@@ -13,6 +13,8 @@ import cv2
 
 
 def get_device():
+    # Prefer native CUDA for stability/performance; otherwise use CPU.
+    # DirectML backends can fail on grouped conv kernels used by HPF blocks.
     return torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 

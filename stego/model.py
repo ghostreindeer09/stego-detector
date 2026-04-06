@@ -4,6 +4,42 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
+from .features import get_kv_kernel_5x5
+
+
+class LearnableHPF(nn.Module):
+    """Learnable 5x5 HPF initialized from KV kernel (per RGB channel)."""
+
+    def __init__(self):
+        super().__init__()
+        kv = get_kv_kernel_5x5().reshape(1, 1, 5, 5)
+        kv = torch.from_numpy(kv).repeat(3, 1, 1, 1)
+        self.weight = nn.Parameter(kv.clone(), requires_grad=True)
+
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
+        return F.conv2d(x, self.weight, bias=None, padding=2, groups=3)
+
+
+class ChannelAttention(nn.Module):
+    def __init__(self, channels: int, reduction: int = 16):
+        super().__init__()
+        reduced = max(1, channels // reduction)
+        self.avg_pool = nn.AdaptiveAvgPool2d(1)
+        self.max_pool = nn.AdaptiveMaxPool2d(1)
+        self.fc = nn.Sequential(
+            nn.Linear(channels, reduced, bias=False),
+            nn.ReLU(inplace=True),
+            nn.Linear(reduced, channels, bias=False),
+            nn.Sigmoid(),
+        )
+
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
+        b, c, _, _ = x.shape
+        avg = self.fc(self.avg_pool(x).view(b, c))
+        mx = self.fc(self.max_pool(x).view(b, c))
+        attn = (avg + mx).view(b, c, 1, 1)
+        return x * attn
+
 
 class SRNet(nn.Module):
     """
@@ -11,13 +47,29 @@ class SRNet(nn.Module):
     Input: [B, 3, H, W] RGB. KV HPF extracts residuals; backbone classifies.
     """
 
-    def __init__(self, num_classes: int = 1, use_kv_hpf: bool = True):
+    def __init__(
+        self,
+        num_classes: int = 1,
+        use_kv_hpf: bool = True,
+        use_learnable_hpf: bool = False,
+        use_channel_attention: bool = False,
+    ):
         super().__init__()
         from .features import KVHighPassFilter
 
         self.use_kv_hpf = use_kv_hpf
-        self.kv_hpf = KVHighPassFilter() if use_kv_hpf else nn.Identity()
-        self.backbone = SRNetBackbone(in_channels=3, num_classes=num_classes)
+        self.use_learnable_hpf = use_learnable_hpf
+        if use_learnable_hpf:
+            self.kv_hpf = LearnableHPF()
+        elif use_kv_hpf:
+            self.kv_hpf = KVHighPassFilter()
+        else:
+            self.kv_hpf = nn.Identity()
+        self.backbone = SRNetBackbone(
+            in_channels=3,
+            num_classes=num_classes,
+            use_channel_attention=use_channel_attention,
+        )
 
     def forward(self, x: torch.Tensor) -> Tuple[torch.Tensor, torch.Tensor]:
         x = self.kv_hpf(x)
@@ -73,7 +125,7 @@ class SRNetBackbone(nn.Module):
     Simplified SRNet-inspired residual CNN for steganalysis on noise residual maps.
     """
 
-    def __init__(self, in_channels: int, num_classes: int = 1):
+    def __init__(self, in_channels: int, num_classes: int = 1, use_channel_attention: bool = False):
         super().__init__()
 
         self.layer1 = nn.Sequential(
@@ -85,6 +137,7 @@ class SRNetBackbone(nn.Module):
         self.layer3 = BasicBlock(64, 128, stride=2)
         self.layer4 = BasicBlock(128, 256, stride=2)
         self.layer5 = BasicBlock(256, 256, stride=2)
+        self.channel_attention = ChannelAttention(256) if use_channel_attention else nn.Identity()
 
         self.global_pool = nn.AdaptiveAvgPool2d((1, 1))
         self.fc = nn.Linear(256, num_classes)
@@ -95,6 +148,7 @@ class SRNetBackbone(nn.Module):
         x = self.layer3(x)
         x = self.layer4(x)
         x = self.layer5(x)
+        x = self.channel_attention(x)
         feat_map = x
         x = self.global_pool(x)
         x = torch.flatten(x, 1)

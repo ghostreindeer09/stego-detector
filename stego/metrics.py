@@ -59,6 +59,27 @@ def compute_metrics(
     tp, fp, fn, tn = confusion_matrix_binary(y_true, y_pred)
     precision, recall, f1 = f1_score_from_cm(tp, fp, fn, tn)
     auc = weighted_auc(y_true, y_score)
+    
+    accuracy = (tp + tn) / max(1, tp + fp + fn + tn)
+    fpr_val = fp / max(1, fp + tn)
+    fnr_val = fn / max(1, tp + fn)
+    pe = (fpr_val + fnr_val) / 2.0
+    
+    try:
+        from sklearn.metrics import roc_curve
+        fpr_curve, tpr_curve, _ = roc_curve(y_true, y_score)
+        fnr_curve = 1 - tpr_curve
+        eer_idx = np.nanargmin(np.absolute((fnr_curve - fpr_curve)))
+        eer = float(fpr_curve[eer_idx])
+        
+        idx_1 = np.where(fpr_curve <= 0.01)[0]
+        tpr_at_1 = float(tpr_curve[idx_1[-1]]) if len(idx_1) > 0 else 0.0
+        
+        idx_5 = np.where(fpr_curve <= 0.05)[0]
+        tpr_at_5 = float(tpr_curve[idx_5[-1]]) if len(idx_5) > 0 else 0.0
+    except ImportError:
+        eer, tpr_at_1, tpr_at_5 = 0.0, 0.0, 0.0
+
     return {
         "weighted_auc": auc,
         "f1": f1,
@@ -68,4 +89,9 @@ def compute_metrics(
         "fp": fp,
         "fn": fn,
         "tn": tn,
+        "accuracy": accuracy,
+        "pe": pe,
+        "eer": eer,
+        "tpr_at_fpr_0.01": tpr_at_1,
+        "tpr_at_fpr_0.05": tpr_at_5,
     }
