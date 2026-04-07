@@ -127,38 +127,8 @@ The model was evaluated on **10 completely unseen images** (5 clean + 5 stego) t
 
 ## 🏗️ Architecture
 
-### SRNet Model
+<img width="223" height="718" alt="image" src="https://github.com/user-attachments/assets/f1dec07a-4ae8-4bea-85f4-c89f9fff1ecc" />
 
-```
-Input [B, 3, 256, 256]
-    │
-    ▼
-KV High-Pass Filter (5×5, fixed, non-trainable)
-    │
-    ▼
-Conv2d(3→32) → BN → ReLU
-    │
-    ▼
-BasicBlock(32→64, stride=2)     ← Residual connection
-    │
-    ▼
-BasicBlock(64→128, stride=2)    ← Residual connection
-    │
-    ▼
-BasicBlock(128→256, stride=2)   ← Residual connection
-    │
-    ▼
-BasicBlock(256→256, stride=2)   ← Residual connection
-    │
-    ▼
-AdaptiveAvgPool2d(1×1)
-    │
-    ▼
-Linear(256→1) → Sigmoid
-    │
-    ▼
-Output: P(stego) ∈ [0, 1]
-```
 
 - **Parameters**: 2,454,892 (2.45M)
 - **High-Pass Filter**: Fixed Ker-Vass 5×5 kernel extracts noise residuals
