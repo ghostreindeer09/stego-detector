@@ -139,27 +139,8 @@ The model was evaluated on **10 completely unseen images** (5 clean + 5 stego) t
 
 ## 🔄 Pipeline
 
-```
-data/source_images/              ← 131,183 raw PNG cover images (256×256)
-         │
-         ▼
-pipeline/preflight.py            ← GPU, disk, image audit, algorithm checks
-         │
-         ▼
-pipeline/data_gen.py             ← Leakage-free split (80/10/10) + LSB embedding
-         │
-         ▼
-data/splits_v31/
-  train/cover/ + stego/          ← 104,946 pairs × 4 algorithms
-  val/cover/ + stego/            ← 13,118 pairs, lsb_sequential only
-  test/cover/ + stego/           ← 13,119 pairs, lsb_sequential only
-         │
-         ▼
-pipeline/trainer.py              ← SRNet, FocalLoss, curriculum, BF16 AMP
-         │
-         ▼
-checkpoints/srnet_v31_baseline_best.pth   ← Best model (Epoch 69)
-```
+<img width="307" height="597" alt="image" src="https://github.com/user-attachments/assets/9393424d-1a12-4431-b649-845d58c110e1" />
+
 
 ### Embedding Algorithms
 
