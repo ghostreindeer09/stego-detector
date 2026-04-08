@@ -242,10 +242,49 @@ python -c "import torch; c=torch.load('checkpoints/srnet_v31_baseline_best.pth',
 ---
 
 ## 📁 Project Structure
+```
+stego-detector/
+│
+├── run_pipeline_v31.py              # Main entry point — argument parser
+│
+├── pipeline/                        # Core training pipeline
+│   ├── preflight.py                 #   Pre-flight checks, GPU monitor
+│   ├── data_gen.py                  #   Leakage-free split + LSB embedding
+│   └── trainer.py                   #   Training loop, FocalLoss, curriculum
+│
+├── stego/                           # Model & data modules
+│   ├── model.py                     #   SRNet architecture, GradCAM
+│   ├── features.py                  #   KV HPF, SRM, DCT feature extraction
+│   ├── datasets.py                  #   PairConstraintStegoDataset
+│   ├── detector.py                  #   Inference wrapper
+│   └── metrics.py                   #   AUC, F1, EER, PE, TPR@FPR
+│
+├── framework/                       # Embedding & research framework
+│   └── embedding.py                 #   LSB embedding (4 algorithms)
+│
+├── unseen_test/                     # Independent validation
+│   └── unseen_test.py               #   Test on completely unseen images
+│
+├── configs/                         # Experiment configurations
+│   ├── default_experiment.yaml
+│   └── openimages_experiment.yaml
+│
+├── app.py                           # Streamlit web demo
+├── Dockerfile                       # Docker setup
+├── docker-compose.yml               # Docker Compose
+├── requirements.txt                 # Python dependencies
+│
+├── data/                            # Data directory (gitignored)
+│   ├── source_images/               #   131,183 raw PNG cover images
+│   └── splits_v31/                  #   Generated train/val/test splits
+│       ├── train/cover/ + stego/
+│       ├── val/cover/ + stego/
+│       └── test/cover/ + stego/
+│
+└── checkpoints/                     # Saved models (gitignored)
+    └── srnet_v31_baseline_best.pth  #   Best model checkpoint
 
-<img width="1343" height="142" alt="image" src="https://github.com/user-attachments/assets/b4c39b10-a8d3-4a98-9c9e-3c46057c587b" />
-
----
+---```
 
 ## 🐳 Docker
 
